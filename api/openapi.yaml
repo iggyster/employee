@@ -1,0 +1,1216 @@
+openapi: 3.0.1
+info:
+  version: 1.0.0
+  title: Employee REST API
+  description: REST API documentation for the Employee microservices.
+
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+tags:
+  - name: API Categories
+    description: Endpoints for managing API categories
+  - name: Profiles
+    description: Endpoints for managing employee profiles
+  - name: Educations
+    description: Endpoints for managing employee educations
+  - name: Skills
+    description: Endpoints for managing employee skills
+  - name: Certifications
+    description: Endpoints for managing employee certifications
+
+components:
+  securitySchemes:
+    AccessToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  headers:
+    X-Api-Version:
+      schema:
+        $ref: '#/components/schemas/Date'
+
+  parameters:
+    Version:
+      in: header
+      name: X-Api-Version
+      schema:
+        $ref: '#/components/headers/X-Api-Version'
+      description: "Custom header to control API versioning"
+      example: "2023-04-17"
+
+    ID:
+      in: path
+      name: id
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+      description: Profile ID.
+
+    EducationId:
+      in: path
+      name: educationId
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+      description: Education ID.
+
+    SkillID:
+      in: path
+      name: skillId
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+      description: Skill ID.
+
+    CertificationID:
+      in: path
+      name: certificationId
+      required: true
+      schema:
+        $ref: '#/components/schemas/UUID'
+      description: Certification ID.
+
+    PageParam:
+      name: page
+      in: query
+      description: The page number for pagination. Defaults to 1.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    LimitParam:
+      name: limit
+      in: query
+      description: The number of profiles per page. Defaults to 10.
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 10
+
+    SortParam:
+      name: sort
+      in: query
+      description: Sort the profiles by the specified field and order (e.g., name:asc).
+      required: false
+      schema:
+        type: string
+
+  requestBodies:
+    ProfilePostRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/components/schemas/Name'
+              - $ref: '#/components/schemas/Surname'
+              - $ref: '#/components/schemas/Gender'
+              - $ref: '#/components/schemas/Email'
+              - $ref: '#/components/schemas/Phone'
+              - $ref: '#/components/schemas/ImageUrl'
+              - $ref: '#/components/schemas/Address'
+              - $ref: '#/components/schemas/EmergencyContact'
+              - $ref: '#/components/schemas/JoiningDate'
+              - $ref: '#/components/schemas/EmploymentType'
+              - $ref: '#/components/schemas/EmploymentStatus'
+              - $ref: '#/components/schemas/WorkLocation'
+              - $ref: '#/components/schemas/DepartmentID'
+              - $ref: '#/components/schemas/Designation'
+              - $ref: '#/components/schemas/SupervisorID'
+              - $ref: '#/components/schemas/Languages'
+              - $ref: '#/components/schemas/Notes'
+            required:
+              - name
+              - surname
+              - email
+
+    ProfilePatchRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            anyOf:
+              - $ref: '#/components/schemas/Name'
+              - $ref: '#/components/schemas/Surname'
+
+    EducationPostRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/components/schemas/Education'
+            required:
+              - degree
+              - major
+              - university
+              - completion_year
+
+    EducationPatchRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            anyOf:
+              - $ref: '#/components/schemas/EducationDegree'
+              - $ref: '#/components/schemas/EducationMajor'
+              - $ref: '#/components/schemas/EducationUniversity'
+              - $ref: '#/components/schemas/EducationCompletionYear'
+
+    SkillPostRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/components/schemas/Skill'
+            required:
+              - name
+              - level
+
+    SkillPatchRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            anyOf:
+              - $ref: '#/components/schemas/SkillName'
+              - $ref: '#/components/schemas/SkillLevel'
+              - $ref: '#/components/schemas/SkillStatus'
+
+    CertificationPostRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            allOf:
+              - $ref: '#/components/schemas/Certification'
+            required:
+              - name # unique
+              - authority # unique
+              - completion_date
+
+    CertificationPatchRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            anyOf:
+              - $ref: '#/components/schemas/CertificationName'
+              - $ref: '#/components/schemas/CertificationAuthority'
+              - $ref: '#/components/schemas/CertificationCompletionDate'
+
+  responses:
+    Default:
+      description: OK
+
+    Categories:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              type: string
+
+    ProfileList:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total_count:
+                type: integer
+              profiles:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Profile'
+
+    ProfileResponse:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Profile'
+        application/pdf:   # Set the content type to PDF
+          schema:
+            type: string   # Assuming the PDF content will be a base64-encoded string
+
+    EducationsList:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total_count:
+                type: integer
+              educations:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/ID'
+                    - $ref: '#/components/schemas/Education'
+
+    EducationResponse:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ID'
+              - $ref: '#/components/schemas/Education'
+
+    SkillsList:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total_count:
+                type: integer
+              skills:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/ID'
+                    - $ref: '#/components/schemas/Skill'
+
+    SkillResponse:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ID'
+              - $ref: '#/components/schemas/Skill'
+
+    CertificationsList:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              total_count:
+                type: integer
+              certifications:
+                type: array
+                items:
+                  allOf:
+                    - $ref: '#/components/schemas/ID'
+                    - $ref: '#/components/schemas/Certification'
+
+    CertificationResponse:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            allOf:
+              - $ref: '#/components/schemas/ID'
+              - $ref: '#/components/schemas/Certification'
+
+    ImageResponse:
+      description: Ok
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ImageUrl'
+
+    NoContent:
+      description: No Content
+
+    BadRequest:
+      description: Bad Request
+
+    NotFound:
+      description: Not Found
+
+    UnprocessableEntity:
+      description: Unprocessable Entity
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+  schemas:
+    ID:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/UUID'
+
+    UUID:
+      type: string
+      format: uuid
+
+    Date:
+      type: string
+      format: date
+      example: "2023-07-20"
+
+    Profile:
+      allOf:
+        - $ref: '#/components/schemas/ID'
+        - $ref: '#/components/schemas/Name'
+        - $ref: '#/components/schemas/Surname'
+        - $ref: '#/components/schemas/Username'
+        - $ref: '#/components/schemas/Gender'
+        - $ref: '#/components/schemas/Email'
+        - $ref: '#/components/schemas/Phone'
+        - $ref: '#/components/schemas/ImageUrl'
+        - $ref: '#/components/schemas/Address'
+        - $ref: '#/components/schemas/EmergencyContact'
+        - $ref: '#/components/schemas/JoiningDate'
+        - $ref: '#/components/schemas/EmploymentType'
+        - $ref: '#/components/schemas/EmploymentStatus'
+        - $ref: '#/components/schemas/WorkLocation'
+        - $ref: '#/components/schemas/Department'
+        - $ref: '#/components/schemas/Designation'
+        - $ref: '#/components/schemas/SupervisorUrl'
+        - $ref: '#/components/schemas/EducationsUrl'
+        - $ref: '#/components/schemas/CertificationsUrl'
+        - $ref: '#/components/schemas/SkillsUrl'
+        - $ref: '#/components/schemas/LinkedinUrl'
+        - $ref: '#/components/schemas/FacebookUrl'
+        - $ref: '#/components/schemas/InstagramUrl'
+        - $ref: '#/components/schemas/GithubUrl'
+        - $ref: '#/components/schemas/Languages'
+        - $ref: '#/components/schemas/Notes'
+
+    Name:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "John"
+
+    Surname:
+      type: object
+      properties:
+        surname:
+          type: string
+          example: "Doe"
+
+    Username:
+      type: object
+      properties:
+        username:
+          type: string
+          example: "john.doe"
+
+    Gender:
+      type: object
+      properties:
+        gender:
+          type: string
+          example: "Male"
+
+    Email:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "john.doe@example.com"
+
+    Phone:
+      type: object
+      properties:
+        phone:
+          $ref: '#/components/schemas/PhoneNumber'
+
+    PhoneNumber:
+      type: string
+      example: "+1 (987) 654-3210"
+
+    ImageUrl:
+      type: object
+      properties:
+        image_url:
+          type: string
+          format: uri
+          example: "https://employee.com/images/image.jpg"
+
+    Address:
+      type: object
+      properties:
+        address:
+          type: object
+          properties:
+            country:
+              type: string
+              example: "USA"
+            city:
+              type: string
+              example: "New York"
+            state:
+              type: string
+              example: "NY"
+            street:
+              type: string
+              example: "123, Main st."
+            postal_code:
+              type: string
+              example: "10001"
+            lat:
+              type: string
+              example: "40.7863096"
+            lon:
+              type: string
+              example: "-73.9712354"
+
+    EmergencyContact:
+      type: object
+      properties:
+        emergency_contact:
+          type: object
+          properties:
+            name:
+              type: string
+              example: "Jane Doe"
+            relationship:
+              type: string
+              example: "Spouse"
+            phone:
+              $ref: '#/components/schemas/PhoneNumber'
+
+    JoiningDate:
+      type: object
+      properties:
+        joining_date:
+          type: string
+          format: date
+
+    EmploymentType:
+      type: object
+      properties:
+        employment_type:
+          type: string
+          default: "Full-Time"
+          enum: ["Full-Time", "Part-Time", "Remote", "On-Bench"]
+
+    EmploymentStatus:
+      type: object
+      properties:
+        employment_status:
+          type: string
+          default: "Active"
+          enum: ["Active", "Inactive"]
+
+    WorkLocation:
+      type: object
+      properties:
+        work_location:
+          type: string
+          default: "Office"
+          enum: ["Office", "Remote"]
+
+    DepartmentID:
+      type: object
+      properties:
+        department_id:
+          $ref: '#/components/schemas/UUID'
+
+    Department:
+      type: object
+      properties:
+        department:
+          type: string
+          example: "Software Engineering"
+
+    Designation:
+      type: object
+      properties:
+        designation:
+          type: string
+          example: "Lead Software Engineer"
+
+    SupervisorID:
+      type: object
+      properties:
+        supervisor_id:
+          $ref: '#/components/schemas/UUID'
+
+    SupervisorUrl:
+      type: object
+      properties:
+        supervisor_url:
+          type: string
+          format: uri
+          example: "https://employee.com/profiles/1bd4343e-dca9-4122-bfa0-c3b04588fd3e"
+
+    EducationsUrl:
+      type: object
+      properties:
+        educations_url:
+          type: string
+          format: uri
+          example: "https://employee.com/profiles/3fa85f64-5717-4562-b3fc-2c963f66afa6/educations"
+
+    Education:
+      allOf:
+        - $ref: '#/components/schemas/EducationDegree'
+        - $ref: '#/components/schemas/EducationMajor'
+        - $ref: '#/components/schemas/EducationUniversity'
+        - $ref: '#/components/schemas/EducationCompletionYear'
+    
+    EducationDegree:
+      type: object
+      properties:
+        degree:
+          type: string
+          example: "Master of Science"
+
+    EducationMajor:
+      type: object
+      properties:
+        major:
+          type: string
+          example: "Computer Science"
+
+    EducationUniversity:
+      type: object
+      properties:
+        university:
+          type: string
+          example: "Massachusetts Institute of Technology"
+
+    EducationCompletionYear:
+      type: object
+      properties:
+        completion_year:
+          type: integer
+          example: 2004
+
+    CertificationsUrl:
+      type: object
+      properties:
+        certifications_url:
+          type: string
+          format: uri
+          example: "https://employee.com/profiles/3fa85f64-5717-4562-b3fc-2c963f66afa6/certifications"
+
+    Certification:
+      allOf:
+        - $ref: '#/components/schemas/CertificationName'
+        - $ref: '#/components/schemas/CertificationAuthority'
+        - $ref: '#/components/schemas/CertificationCompletionDate'
+
+    CertificationName:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "AWS Certified Solutions Architect - Associate (SAA-C03)"
+
+    CertificationAuthority:
+      type: object
+      properties:
+        authority:
+          type: string
+          example: "Amazon Web Services"
+
+    CertificationCompletionDate:
+      type: object
+      properties:
+        completion_date:
+          type: string
+          format: date
+
+    SkillsUrl:
+      type: object
+      properties:
+        skills_url:
+          type: string
+          format: uri
+          example: "https://employee.com/profiles/3fa85f64-5717-4562-b3fc-2c963f66afa6/skills"
+        
+    Skill:
+      allOf:
+        - $ref: '#/components/schemas/SkillName'
+        - $ref: '#/components/schemas/SkillLevel'
+        - $ref: '#/components/schemas/SkillStatus'
+
+    SkillName:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Programming"
+
+    SkillLevel:
+      type: object
+      properties:
+        level:
+          type: string
+          example: "Novice"
+
+    SkillStatus:
+      type: object
+      properties:
+        status:
+          type: string
+          default: "Unconfirmed"
+          enum: ["Confirmed", "Certified", "Unconfirmed"]
+
+    LinkedinUrl:
+      type: object
+      properties:
+        linkedin_url:
+          type: string
+          format: uri
+          example: "https://www.linkedin.com/in/john.doe"
+
+    FacebookUrl:
+      type: object
+      properties:
+        facebook_url:
+          type: string
+          format: uri
+          example: "https://www.facebook.com/johndoe"
+
+    InstagramUrl:
+      type: object
+      properties:
+        facebook_url:
+          type: string
+          format: uri
+          example: "https://www.instagram.com/johndoe"
+
+    GithubUrl:
+      type: object
+      properties:
+        github_url:
+          type: string
+          format: uri
+          example: "https://www.github.com/johndoe"
+
+    Languages:
+      type: object
+      properties:
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Language'
+
+    Language:
+      type: string
+      example: "English"
+
+    Notes:
+      type: object
+      properties:
+        notes:
+          type: string
+          example: "Lorem ipusm sit amet"
+
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+          example: "Validation errors"
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+
+    ErrorDetail:
+      type: object
+      properties:
+        resource:
+          type: string
+          example: "profiles"
+        field:
+          type: string
+          example: "email"
+        code:
+          type: string
+          example: "custom"
+        message:
+          type: string
+          example: "Email is not exists"
+
+paths:
+  /:
+    parameters:
+      - $ref: '#/components/parameters/Version'
+
+    get:
+      security:
+        - AccessToken: []
+      tags:
+        - API Categories
+      summary: Get all API categories
+      description: Retrieve a list of all endpoint categories that the API supports.
+      responses:
+        '200':
+          $ref: '#/components/responses/Categories'
+
+    head:
+      security:
+        - AccessToken: []
+      tags:
+        - API Categories
+      summary: Get HTTP header info for the resource
+      description: Retrieve just the HTTP header information for the resource.
+      responses:
+        '200':
+          $ref: '#/components/responses/Default'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /profiles:
+    parameters:
+      - $ref: '#/components/parameters/Version'
+
+    get:
+      security:
+        - AccessToken: []
+      tags:
+        - Profiles
+      summary: Get all employee profiles
+      description: Retrieve a list of all employee profiles.
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/SortParam'
+      responses:
+        '200':
+          $ref: '#/components/responses/ProfileList'
+
+    post:
+      security:
+        - AccessToken: []
+      tags:
+        - Profiles
+      summary: Create an employee profile
+      description: Create a new employee profile.
+      requestBody:
+        $ref: '#/components/requestBodies/ProfilePostRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/ProfileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    head:
+      security:
+        - AccessToken: []
+      tags:
+        - Profiles
+      summary: Get HTTP header info for the resource
+      description: Retrieve just the HTTP header information for the resource.
+      responses:
+        '200':
+          $ref: '#/components/responses/ProfileResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /profiles/images:
+    parameters:
+      - $ref: '#/components/parameters/Version'
+
+    post:
+      security:
+        - AccessToken: []
+      tags:
+        - Profiles
+      summary: Upload an employee profile image.
+      description: Add a new employee education to the employee profile.
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '201':
+          $ref: '#/components/responses/ImageResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    head:
+      security:
+        - AccessToken: []
+      tags:
+        - Profiles
+      summary: Get HTTP header info for the resource
+      description: Retrieve just the HTTP header information for the resource.
+      responses:
+        '200':
+          $ref: '#/components/responses/Default'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /profiles/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Version'
+      - $ref: '#/components/parameters/ID'
+
+    get:
+      security:
+        - AccessToken: []
+      tags:
+        - Profiles
+      summary: Get an employee profile
+      description: Retrieve a specific employee profile by ID.
+      responses:
+        '200':
+          $ref: '#/components/responses/ProfileResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    patch:
+      security:
+        - AccessToken: []
+      tags:
+        - Profiles
+      summary: Update part of an employee profile
+      description: Update a part of an existing employee profile.
+      requestBody:
+        $ref: '#/components/requestBodies/ProfilePatchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/ProfileResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      security:
+        - AccessToken: []
+      tags:
+        - Profiles
+      summary: Delete an employee profile
+      description: Delete an existing employee profile.
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    head:
+      security:
+        - AccessToken: []
+      tags:
+        - Profiles
+      summary: Get HTTP header info for the resource
+      description: Retrieve just the HTTP header information for the resource.
+      responses:
+        '200':
+          $ref: '#/components/responses/Default'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /profiles/{id}/educations:
+    parameters:
+      - $ref: '#/components/parameters/Version'
+      - $ref: '#/components/parameters/ID'
+
+    get:
+      security:
+        - AccessToken: []
+      tags:
+        - Educations
+      summary: Get all employee educations.
+      description: Retrieve all educations for a specific employee profile by profile ID.
+      responses:
+        '200':
+          $ref: '#/components/responses/EducationsList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      security:
+        - AccessToken: []
+      tags:
+        - Educations
+      summary: Create an employee education.
+      description: Add a new employee education to the employee profile.
+      requestBody:
+        $ref: '#/components/requestBodies/EducationPostRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/EducationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    head:
+      security:
+        - AccessToken: []
+      tags:
+        - Educations
+      summary: Get HTTP header info for the resource
+      description: Retrieve just the HTTP header information for the resource.
+      responses:
+        '200':
+          $ref: '#/components/responses/Default'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /profiles/{id}/educations/{educationId}:
+    parameters:
+      - $ref: '#/components/parameters/Version'
+      - $ref: '#/components/parameters/ID'
+      - $ref: '#/components/parameters/EducationId'
+
+    patch:
+      security:
+        - AccessToken: []
+      tags:
+        - Educations
+      summary: Update part of an employee education.
+      description: Update a part of an existing employee education.
+      requestBody:
+        $ref: '#/components/requestBodies/EducationPatchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/EducationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      security:
+        - AccessToken: []
+      tags:
+        - Educations
+      summary: Delete am employee education.
+      description: Remove an education from a specific employee profile by profile ID.
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    head:
+      security:
+        - AccessToken: []
+      tags:
+        - Educations
+      summary: Get HTTP header info for the resource
+      description: Retrieve just the HTTP header information for the resource.
+      responses:
+        '200':
+          $ref: '#/components/responses/Default'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /profiles/{id}/skills:
+    parameters:
+      - $ref: '#/components/parameters/ID'
+
+    get:
+      security:
+        - AccessToken: []
+      tags:
+        - Skills
+      summary: Get all employee skills.
+      description: Retrieve all skills for a specific employee profile by profile ID.
+      responses:
+        '200':
+          $ref: '#/components/responses/SkillsList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      security:
+        - AccessToken: []
+      tags:
+        - Skills
+      summary: Create an employee skill.
+      description: Create a new employee skill or add the existing skill to the employee profile.
+      requestBody:
+        $ref: '#/components/requestBodies/SkillPostRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/SkillResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    head:
+      security:
+        - AccessToken: []
+      tags:
+        - Skills
+      summary: Get HTTP header info for the resource
+      description: Retrieve just the HTTP header information for the resource.
+      responses:
+        '200':
+          $ref: '#/components/responses/Default'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /profiles/{id}/skills/{skillId}:
+    parameters:
+      - $ref: '#/components/parameters/ID'
+      - $ref: '#/components/parameters/SkillID'
+
+    patch:
+      security:
+        - AccessToken: []
+      tags:
+        - Skills
+      summary: Update part of an employee skill.
+      description: Update a part of an existing employee skill.
+      requestBody:
+        $ref: '#/components/requestBodies/SkillPatchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/SkillResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      security:
+        - AccessToken: []
+      tags:
+        - Skills
+      summary: Delete am employee skill.
+      description: Remove a skill from a specific employee profile by profile ID.
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    head:
+      security:
+        - AccessToken: []
+      tags:
+        - Skills
+      summary: Get HTTP header info for the resource
+      description: Retrieve just the HTTP header information for the resource.
+      responses:
+        '200':
+          $ref: '#/components/responses/Default'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /profiles/{id}/certifications:
+    parameters:
+      - $ref: '#/components/parameters/Version'
+      - $ref: '#/components/parameters/ID'
+
+    get:
+      security:
+        - AccessToken: []
+      tags:
+        - Certifications
+      summary: Get all employee certifications.
+      description: Retrieve all certifications for a specific employee profile by profile ID.
+      responses:
+        '200':
+          $ref: '#/components/responses/CertificationsList'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    post:
+      security:
+        - AccessToken: []
+      tags:
+        - Certifications
+      summary: Create a certification.
+      description: Add a new certifications to the employee profile.
+      requestBody:
+        $ref: '#/components/requestBodies/CertificationPostRequest'
+      responses:
+        '201':
+          $ref: '#/components/responses/CertificationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    head:
+      security:
+        - AccessToken: []
+      tags:
+        - Certifications
+      summary: Get HTTP header info for the resource
+      description: Retrieve just the HTTP header information for the resource.
+      responses:
+        '200':
+          $ref: '#/components/responses/Default'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /profiles/{id}/certifications/{certificationId}:
+    parameters:
+      - $ref: '#/components/parameters/Version'
+      - $ref: '#/components/parameters/ID'
+      - $ref: '#/components/parameters/CertificationID'
+
+    patch:
+      security:
+        - AccessToken: []
+      tags:
+        - Certifications
+      summary: Update part of an employee certification.
+      description: Update a part of an existing employee certification.
+      requestBody:
+        $ref: '#/components/requestBodies/CertificationPatchRequest'
+      responses:
+        '200':
+          $ref: '#/components/responses/CertificationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+
+    delete:
+      security:
+        - AccessToken: []
+      tags:
+        - Certifications
+      summary: Delete am employee certification.
+      description: Remove a certification from a specific employee profile by profile ID.
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContent'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+    head:
+      security:
+        - AccessToken: []
+      tags:
+        - Certifications
+      summary: Get HTTP header info for the resource
+      description: Retrieve just the HTTP header information for the resource.
+      responses:
+        '200':
+          $ref: '#/components/responses/Default'
+        '404':
+          $ref: '#/components/responses/NotFound'
